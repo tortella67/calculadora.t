@@ -2,16 +2,57 @@
 <html>
 <head>
     <title>Calculadora</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: 
+#f2f2f2;
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        form {
+            background: white;
+            display: inline-block;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px gray;
+        }
+
+        input, select, button {
+            margin: 10px;
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: 
+#4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+
+        h2 {
+            color: blue;
+        }
+    </style>
+
 </head>
+
 <body>
 
-    <h1>Calculadora con Django</h1>
+    <h1>Calculadora Django</h1>
 
     <form method="post">
         {% csrf_token %}
 
-        <input type="number" step="any" name="num1" placeholder="Número 1" required>
-        <input type="number" step="any" name="num2" placeholder="Número 2" required>
+        <input type="number" step="any" name="num1" placeholder="Número 1">
 
         <select name="operacion">
             <option value="suma">+</option>
@@ -19,6 +60,10 @@
             <option value="multiplicacion">*</option>
             <option value="division">/</option>
         </select>
+
+        <input type="number" step="any" name="num2" placeholder="Número 2">
+
+        <br>
 
         <button type="submit">Calcular</button>
     </form>
