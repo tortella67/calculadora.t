@@ -1,76 +1,356 @@
 <!DOCTYPE html>
-<html>
+<html lang="ca">
 <head>
-    <title>Calculadora</title>
+    <meta charset="UTF-8">
+    <title>Sexi Calculadora</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
 
     <style>
+        :root {
+            --bg: #0a0a0f;
+            --surface: #13131a;
+            --card: #1a1a24;
+            --border: #2a2a3a;
+            --accent: #7c6dfa;
+            --accent-glow: rgba(124, 109, 250, 0.35);
+            --accent2: #fa6d9a;
+            --text: #e8e8f0;
+            --muted: #6b6b80;
+            --result-bg: #0f0f18;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background-color: 
-#f2f2f2;
+            font-family: 'DM Mono', monospace;
+            background-color: var(--bg);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Background blobs */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -20%;
+            left: -10%;
+            width: 55%;
+            height: 55%;
+            background: radial-gradient(ellipse, rgba(124,109,250,0.12) 0%, transparent 70%);
+            pointer-events: none;
+            animation: pulse 6s ease-in-out infinite alternate;
+        }
+        body::after {
+            content: '';
+            position: fixed;
+            bottom: -20%;
+            right: -10%;
+            width: 50%;
+            height: 50%;
+            background: radial-gradient(ellipse, rgba(250,109,154,0.10) 0%, transparent 70%);
+            pointer-events: none;
+            animation: pulse 7s ease-in-out infinite alternate-reverse;
+        }
+
+        @keyframes pulse {
+            from { opacity: 0.7; transform: scale(1); }
+            to   { opacity: 1;   transform: scale(1.08); }
+        }
+
+        /* Grid lines background */
+        .grid-bg {
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+            background-size: 48px 48px;
+            pointer-events: none;
+        }
+
+        /* Wrapper */
+        .wrapper {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            animation: fadeUp 0.7s cubic-bezier(.22,1,.36,1) both;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(32px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Title */
+        .title-block {
             text-align: center;
-            margin-top: 50px;
+            margin-bottom: 8px;
+        }
+        .title-block h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: 2.4rem;
+            font-weight: 800;
+            color: var(--text);
+            letter-spacing: -0.03em;
+            line-height: 1;
+        }
+        .title-block h1 span {
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .title-block p {
+            font-size: 0.72rem;
+            color: var(--muted);
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            margin-top: 6px;
         }
 
-        h1 {
-            color: #333;
+        /* Card */
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 32px 36px;
+            width: 420px;
+            box-shadow:
+                0 0 0 1px rgba(124,109,250,0.08),
+                0 24px 60px rgba(0,0,0,0.5),
+                inset 0 1px 0 rgba(255,255,255,0.06);
         }
 
-        form {
-            background: white;
-            display: inline-block;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px gray;
+        /* Expression row */
+        .expr-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
         }
 
-        input, select, button {
-            margin: 10px;
-            padding: 10px;
-            font-size: 16px;
+        .num-input {
+            width: 100%;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text);
+            font-family: 'DM Mono', monospace;
+            font-size: 1.1rem;
+            padding: 14px 16px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            -moz-appearance: textfield;
+        }
+        .num-input::-webkit-outer-spin-button,
+        .num-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+        .num-input::placeholder { color: var(--muted); }
+        .num-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
         }
 
-        button {
-            background-color: 
-#4CAF50;
-            color: white;
+        /* Operator */
+        .op-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+        .op-label {
+            font-size: 0.62rem;
+            color: var(--muted);
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            text-align: center;
+        }
+        .op-select {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--accent);
+            font-family: 'DM Mono', monospace;
+            font-size: 1.2rem;
+            font-weight: 500;
+            padding: 14px 10px;
+            outline: none;
+            cursor: pointer;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            -webkit-appearance: none;
+            text-align: center;
+            width: 58px;
+            height: 51px;
+        }
+        .op-select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        /* Button */
+        .calc-btn {
+            margin-top: 22px;
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--accent) 0%, #9b6dfa 100%);
+            color: #fff;
             border: none;
-            border-radius: 5px;
+            border-radius: 12px;
+            font-family: 'Syne', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.15s, box-shadow 0.15s;
+            box-shadow: 0 4px 24px rgba(124,109,250,0.4);
+        }
+        .calc-btn::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(255,255,255,0.12);
+            opacity: 0;
+            transition: opacity 0.15s;
+        }
+        .calc-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(124,109,250,0.55); }
+        .calc-btn:hover::after { opacity: 1; }
+        .calc-btn:active { transform: translateY(0); }
+
+        /* Result */
+        .result-box {
+            margin-top: 14px;
+            background: var(--result-bg);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            animation: popIn 0.4s cubic-bezier(.34,1.56,.64,1) both;
         }
 
-        h2 {
-            color: blue;
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.92); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+
+        .result-label {
+            font-size: 0.65rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+        .result-value {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.9rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Divider */
+        .divider {
+            height: 1px;
+            background: var(--border);
+            margin: 22px 0;
+        }
+
+        /* Input labels */
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1;
+            min-width: 0;
+        }
+        .input-group label {
+            font-size: 0.62rem;
+            color: var(--muted);
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            padding-left: 4px;
+            display: block;
+        }
+
+        /* Footer */
+        .footer {
+            font-size: 0.65rem;
+            color: var(--muted);
+            letter-spacing: 0.1em;
+            margin-top: 4px;
+        }
+        .footer span {
+            color: var(--accent);
         }
     </style>
-
 </head>
-
 <body>
 
-    <h1>Calculadora para sexis</h1>
+<div class="grid-bg"></div>
 
-    <form method="post">
-        {% csrf_token %}
+<div class="wrapper">
 
-        <input type="number" step="any" name="num1" placeholder="Número 1">
+    <div class="title-block">
+        <h1>Sexi <span>Calculadora</span></h1>
+        <p>Django · Python · Web</p>
+    </div>
 
-        <select name="operacion">
-            <option value="suma">+</option>
-            <option value="resta">-</option>
-            <option value="multiplicacion">*</option>
-            <option value="division">/</option>
-        </select>
+    <div class="card">
+        <form method="post">
+            {% csrf_token %}
 
-        <input type="number" step="any" name="num2" placeholder="Número 2">
+            <div class="expr-row">
+                <div class="input-group">
+                    <label>Número 1</label>
+                    <input class="num-input" type="number" step="any" name="num1" placeholder="0">
+                </div>
 
-        <br>
+                <div class="op-wrap">
+                    <span class="op-label">Op</span>
+                    <select class="op-select" name="operacion">
+                        <option value="suma">+</option>
+                        <option value="resta">−</option>
+                        <option value="multiplicacion">×</option>
+                        <option value="division">÷</option>
+                    </select>
+                </div>
 
-        <button type="submit">Calcular</button>
-    </form>
+                <div class="input-group">
+                    <label>Número 2</label>
+                    <input class="num-input" type="number" step="any" name="num2" placeholder="0">
+                </div>
+            </div>
 
-    {% if resultado != None %}
-        <h2>Resultado: {{ resultado }}</h2>
-    {% endif %}
+            <button class="calc-btn" type="submit">Calcular</button>
+        </form>
+
+        {% if resultado != None %}
+            <div class="divider"></div>
+            <div class="result-box">
+                <span class="result-label">Resultat</span>
+                <span class="result-value">{{ resultado }}</span>
+            </div>
+        {% endif %}
+    </div>
+
+    <p class="footer">Fet amb <span>Django</span> · Python</p>
+
+</div>
 
 </body>
 </html>
