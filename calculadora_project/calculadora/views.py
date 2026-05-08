@@ -18,6 +18,6 @@ def calculadora_view(request):
             if num2 != 0:
                 resultado = num1 / num2
             else:
-                resultado = "Infinito"
+                resultado = "Error"
 
     return render(request, "calculadora/calculadora.html", {"resultado": resultado})
